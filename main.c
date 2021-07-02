@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+
 struct session {
 	char url[100];
 };

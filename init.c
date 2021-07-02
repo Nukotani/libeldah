@@ -30,19 +30,22 @@ int init(char *server_name, struct session *session_handle)
 
 	if (curl_global_init(CURL_GLOBAL_FLAG) == CURLE_OK) {
 		session_handle->curl_handle = curl_easy_init();
-		url_type = parse_server_name(server_name);
+		url_type = parse_server_name(server_name, &session_handle->session_url);
 
 		return 0;
 	} else
 		return 1;
 }
 
-int parse_server_name(char *server_name)
+int parse_server_name(char *server_name, struct url *retvar)
 {
-	regex_t *compiled_regex[4];
-	int regcomp_retval[4] = {-1, -1, -1, -1};
+	regex_t *compiled_regex = NULL;
+	char *expr = "^((https{0, 1})://){0, 1}(.*(\.*)*)(:([1-9]\d*)){0, 1}$";
+	int regcomp_retval = -1;
+	int regexec_retval = -1;
 
-	regcomp_retval = regcomp()
+	regcomp_retval = regcomp(compiled_regex, expr, REG_EXTENDED);
+	//regexec_retval = regexec(
 
 	return -1;
 }

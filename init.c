@@ -1,6 +1,7 @@
 #include "include.h"
 #include <string.h>
 #include "init.h"
+#include <regex.h>
 
 #ifdef _WIN32
 #ifdef SSL
@@ -38,5 +39,10 @@ int init(char *server_name, struct session *session_handle)
 
 int parse_server_name(char *server_name)
 {
-	return 1;
+	regex_t *compiled_regex[4];
+	int regcomp_retval[4] = {-1, -1, -1, -1};
+
+	regcomp_retval = regcomp()
+
+	return -1;
 }

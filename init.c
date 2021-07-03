@@ -18,7 +18,7 @@
 #endif
 #endif
 
-int init(char *server_name, struct session *restrict session_handle)
+int init(char *server_name, struct session *session_handle)
 {
 	int url_type = -1;
 

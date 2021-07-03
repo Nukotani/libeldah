@@ -1,5 +1,6 @@
 #include "include.h"
 #include <string.h>
+#include <stdio.h>
 #include "init.h"
 #include <regex.h>
 
@@ -17,7 +18,7 @@
 #endif
 #endif
 
-int init(char *server_name, struct session *session_handle)
+int init(char *server_name, struct session *restrict session_handle)
 {
 	int url_type = -1;
 
@@ -40,12 +41,16 @@ int init(char *server_name, struct session *session_handle)
 int parse_server_name(char *server_name, struct url *retvar)
 {
 	regex_t *compiled_regex = NULL;
-	char *expr = "^((https{0, 1})://){0, 1}(.*(\.*)*)(:([1-9]\d*)){0, 1}$";
+	regmatch_t matchptr[6];
+	size_t nmatch = 6;
 	int regcomp_retval = -1;
 	int regexec_retval = -1;
+	const char *expr = "^((https{0, 1})://){0, 1}(.*(\.*)*)(:([1-9]\d*)){0, 1}$";
 
 	regcomp_retval = regcomp(compiled_regex, expr, REG_EXTENDED);
-	//regexec_retval = regexec(
+	regexec_retval = regexec(compiled_regex, server_name, nmatch, matchptr, 0);
+	
+	printf("%d", matchptr[0].rm_so);
 
 	return -1;
 }

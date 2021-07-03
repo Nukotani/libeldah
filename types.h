@@ -10,7 +10,7 @@ struct session_cookie {
 	char cookie_code[100];
 };
 struct session {
-	struct url session_url;
 	struct session_cookie cookie;
-	CURL *curl_handle;
+	struct url session_url;
+	CURL curl_handle[1];
 };

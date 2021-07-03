@@ -40,15 +40,16 @@ int init(char *server_name, struct session *session_handle)
 
 int parse_server_name(char *server_name, struct url *retvar)
 {
-	regex_t *compiled_regex = NULL;
-	regmatch_t matchptr[6];
-	size_t nmatch = 6;
-	int regcomp_retval = -1;
-	int regexec_retval = -1;
-	const char *expr = "^((https{0, 1})://){0, 1}(.*(\.*)*)(:([1-9]\d*)){0, 1}$";
+	regex_t compiled_regex;
+	regmatch_t matchptr[7];
 
-	regcomp_retval = regcomp(compiled_regex, expr, REG_EXTENDED);
-	regexec_retval = regexec(compiled_regex, server_name, nmatch, matchptr, 0);
+	int regcomp_retval = regcomp(&compiled_regex, "^((https?)://)?(.*(\.*)*)(:([1-9]\d*))?$", REG_EXTENDED);
+	if (!regcomp_retval) {
+		regexec(&compiled_regex, server_name, 7, matchptr, 0);
+	} else {
+	
+		exit(1);
+	}
 	
 	printf("%d", matchptr[0].rm_so);
 

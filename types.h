@@ -1,7 +1,7 @@
 struct url {
+	char path[200]
 	char hostname[100];
-	char path[100];
-	char protocol[6];
+	char protocol[5];
 	int port;
 };
 struct session_cookie {

@@ -1,8 +1,8 @@
 struct url {
-	char path[200]
+	char path[200];
 	char hostname[100];
-	char protocol[5];
-	int port;
+	char protocol[6];
+	long port;
 };
 struct session_cookie {
 	char username[100];
@@ -12,5 +12,5 @@ struct session_cookie {
 struct session {
 	struct session_cookie cookie;
 	struct url session_url;
-	CURL curl_handle[1];
+	CURL *curl_handle;
 };

@@ -1,24 +1,10 @@
-#include "include.h"
-#include <string.h>
-#include <stdio.h>
 #include "init.h"
-#include <regex.h>
 
-#ifdef SSL
-	#define DEFAULT_PROTOCOL "https"
-	#ifdef _WIN32
-		#define CURL_GLOBAL_FLAG CURL_GLOBAL_ALL
-	#else
-		#define CURL_GLOBAL_FLAG CURL_GLOBAL_SSL
-	#endif
-#else
-	#define DEFAULT_PROTOCOL "http"
-	#ifdef _WIN32
-		#define CURL_GLOBAL_FLAG CURL_GLOBAL_WIN32
-	#else
-		#define CURL_GLOBAL_FLAG CURL_GLOBAL_NOTHING
-	#endif
-#endif
+static size_t check_website(char *data, size_t size, size_t nmemb, void *return_var)
+{
+	parse_html(data, size * nmemb,  "", "utf8", (xmlNode *) return_var);
+	return size * nmemb;
+}
 
 int init(char *server_name, struct session *session_handle)
 {
@@ -37,7 +23,7 @@ int init(char *server_name, struct session *session_handle)
 		memset(session_handle->session_url.protocol, 0, 6);
 		session_handle->session_url.port = 0;
 
-		int url_ret parse_server_name(server_name, &session_handle->session_url);
+		int url_ret = parse_server_name(server_name, &session_handle->session_url);
 		if (url_ret)
 			return 2;
 
@@ -46,44 +32,31 @@ int init(char *server_name, struct session *session_handle)
 
 		char buffer[400];
 		memset(buffer, 0, 400);
+		xmlNode parsed_buffer[1];
 
 		if (session_handle->session_url.protocol[0] != '\0') {
 			strncat(buffer, session_handle->session_url.protocol, 100);
-			strncat(buffer, "://", 3);
+			strncat(buffer, "://", 4);
 		}
 		strncat(buffer, session_handle->session_url.hostname, 100);
 		if (session_handle->session_url.port != 0)
 			curl_easy_setopt(session_handle->curl_handle, CURLOPT_PORT, session_handle->session_url.port);
 
-		return 0;
+		curl_easy_setopt(session_handle->curl_handle, CURLOPT_URL, buffer);
+		curl_easy_setopt(session_handle->curl_handle, CURLOPT_BUFFERSIZE, 1024);
+		curl_easy_setopt(session_handle->curl_handle, CURLOPT_TCP_FASTOPEN, 1L);
+		curl_easy_setopt(session_handle->curl_handle, CURLOPT_WRITEFUNCTION, check_website);
+		curl_easy_setopt(session_handle->curl_handle, CURLOPT_WRITEDATA, check_website);
+
+		if(curl_easy_perform(session_handle->curl_handle) == CURLE_OK) {
+
+			return 0;
+		}
+
+		return 4;
+
 	} else
 		return 1;
 }
 
-int parse_server_name(char *server_name, struct url *retvar)
-{
-	regex_t compiled_regex;
-	regmatch_t matchptr[7];
 
-	int regcomp_retval = regcomp(&compiled_regex, "^((https?)://)?([^:]*(\.[^:]*)*)(:([1-9]\d*))?$", REG_EXTENDED);
-	if (!regcomp_retval) {
-		regexec(&compiled_regex, server_name, 7, matchptr, 0);
-
-		if (matchptr[3].rm_so < 0)
-			return 1;
-		strncpy(retvar->hostname, server_name + matchptr[3].rm_so, matchptr[3].rm_eo - matchptr[3].rm_so);
-		if (matchptr[2].rm_so >= 0) {
-			strncpy(retvar->protocol, server_name + matchptr[2].rm_so, matchptr[2].rm_eo - matchptr[2].rm_so);
-		}
-		if (matchptr[6].rm_so > 0) {
-			char buff[6];
-			char *end;
-			strncpy(buff, server_name + matchptr[6].rm_so, matchptr[6].rm_eo - matchptr[6].rm_so);
-			retvar->port = strtol(buff, &end, 10);
-		}
-	}
-
-	regfree(&compiled_regex);
-
-	return 0;
-}

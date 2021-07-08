@@ -28,14 +28,13 @@ int parse_server_name(char *server_name, struct url *retvar)
 	return 0;
 }
 
-int parse_html(char *buffer, int size, char *url, char *encoding, xmlNode *first_element)
+int parse_html(char *buffer, GumboOutput *output)
 {
-	htmlDocPtr document_ptr = htmlReadMemory(buffer, size, url, encoding, HTML_PARSE_RECOVER | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING | HTML_PARSE_NOIMPLIED);
-	if (document_ptr == NULL)
+	//parser dari google
+	GumboOutput *parser_retvar = NULL;
+	parser_retvar  = gumbo_parse(buffer);
+	if (parser_retvar == NULL)
 		return 1;
-	first_element = xmlDocGetRootElement(document_ptr);
-	if (first_element  == NULL)
-		return 2;
-
+	memcpy(output, parser_retvar, sizeof (GumboOutput));
 	return 0;
 }

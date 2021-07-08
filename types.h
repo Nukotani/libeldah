@@ -1,3 +1,4 @@
+#pragma once
 struct url {
 	char path[200];
 	char hostname[100];
